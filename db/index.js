@@ -31,7 +31,7 @@ class DB {
     // View employees
     viewEmployees() {
         return this.connection.query(
-            "SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, employee.manager_id"
+            "SELECT employee.id, employee.first_name, employee.last_name, employee.role_id"
         );
     }
     // Update the given employee's role

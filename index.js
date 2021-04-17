@@ -1,7 +1,7 @@
 const { prompt } = require("inquirer");
-const { addEmployee, viewDepartments, updateEmployeeRole } = require("./db");
 const db = require("./db");
 require("console.table");
+
 init();
 
 function init() {
@@ -44,6 +44,10 @@ async function requestPrompts() {
                     name: "Update employee role.",
                     value: "UPDATE_EMPLOYEE_ROLE"
                 },
+                {
+                    name: "Exit progam.",
+                    value: "EXIT_PROGRAM"
+                }
 
             ]
         }
@@ -64,57 +68,69 @@ async function requestPrompts() {
             return viewEmployees();
         case "UPDATE_EMPLOYEE_ROLE":
             return updateEmployeeRole();
-    }
-
-    async function viewEmployees() {
-        const employees = await db.viewEmployees();
-
-        console.log("\n");
-        console.table(employees);
-
-        requestPrompts();
-    }
-
-    async function addDepartment() {
-        const department = await prompt([
-            {
-                name: "name",
-                message: "What is the name of the department?"
-            }
-        ]);
-
-        await db.addDepartment(department);
-
-        console.log(`Added ${department.name} to the database`);
-
-        requestPrompts();
-    }
-    async function addRole() {
-        const role = await prompt([
-            {
-                name: "name",
-                message: "What role would you like to add?"
-            }
-        ]);
-
-        await db.addRole(role);
-
-        console.log(`Added ${role.name} to the database`);
-
-        requestPrompts();
-    }
-    async function addEmployee() {
-        const employee = await prompt([
-            {
-                name: "name",
-                message: "What is the name of the employee?"
-            }
-        ]);
-
-        await db.addEmployee(employee);
-
-        console.log(`Added ${employee.name} to the database`);
-
-        requestPrompts();
+        case "EXIT_PROGRAM":
+            return exitProgram();
     }
 }
+// Adds new department to database.
+async function addDepartment() {
+    const department = await prompt([
+        {
+            name: "name",
+            message: "What is the name of the new department??"
+        }
+    ]);
+
+    await db.addDepartment(department);
+
+    console.log(`Added ${department.name} to the database`);
+
+    requestPrompts();
+}
+
+async function addRole() {
+    const departments = await db.viewDepartments();
+
+    const departmentChoices = departments.map(({ id, name }) => ({
+        name: name,
+        value: id
+    }));
+
+    const role = await prompt([
+        {
+            name: "title",
+            message: "What new role would you like to add?"
+        },
+        {
+            type: "list",
+            name: "department_id",
+            message: "What department does this role belong to?",
+            choices: departmentChoices
+        },
+        {
+            name: "salary",
+            message: "What is the starting salary for this role?"
+        }
+    ]);
+
+    await db.addRole(role);
+
+    console.log(`Added ${role.title} to the database`);
+
+    requestPrompts();
+}
+
+async function viewDepartments() {
+    const departments = await db.viewDepartments();
+
+    console.log("\n");
+    console.table(departments);
+
+    requestPrompts();
+}
+
+function exitProgram() {
+    console.log("Goodbye.");
+    process.exit();
+}
+  
