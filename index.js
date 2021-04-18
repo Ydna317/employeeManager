@@ -120,6 +120,39 @@ async function addRole() {
     requestPrompts();
 }
 
+async function addEmployee() {
+    const roles = await db.viewRoles();
+    const employee = await prompt([
+        {
+            name: "first_name",
+            message: "What is the new employee's first name?"
+        },
+        {
+            name: "last_name",
+            message: "What is the new employee's last name?"
+        }
+    ]);
+
+    const roleChoices = roles.map(({ id, title }) => ({
+        name: title,
+        value: id
+    }));
+
+    const { roleID } = await prompt({
+        type: "list",
+        name: "roleID",
+        message: "What role will the new employee be performing?",
+        choices: roleChoices
+    });
+
+    employee.role_id = roleID;
+    console.log(
+        `Added ${employee.first_name} ${employee.last_name} to the database`
+    );
+
+    requestPrompts();
+
+}
 async function viewDepartments() {
     const departments = await db.viewDepartments();
 
@@ -128,6 +161,16 @@ async function viewDepartments() {
 
     requestPrompts();
 }
+
+async function viewRoles() {
+    const roles = await db.viewRoles();
+
+    console.log("\n");
+    console.table(roles);
+
+    requestPrompts();
+}
+
 async function viewEmployees() {
     const departments = await db.viewDepartments();
   
