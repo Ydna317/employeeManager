@@ -45,7 +45,7 @@ async function requestPrompts() {
                     value: "UPDATE_EMPLOYEE_ROLE"
                 },
                 {
-                    name: "Exit progam.",
+                    name: "Exit program.",
                     value: "EXIT_PROGRAM"
                 }
 
@@ -138,18 +138,21 @@ async function addEmployee() {
         value: id
     }));
 
-    const { roleID } = await prompt({
+    const { newEmployee } = await prompt({
         type: "list",
-        name: "roleID",
+        name: "role_id",
         message: "What role will the new employee be performing?",
         choices: roleChoices
     });
 
-    employee.role_id = roleID;
+    employee.role_id = newEmployee;
+    
+    await db.addEmployee(employee);
+    
     console.log(
-        `Added ${employee.first_name} ${employee.last_name} to the database`
+    `Added ${employee.first_name} ${employee.last_name} to the database`
     );
-
+    
     requestPrompts();
 
 }
@@ -172,26 +175,50 @@ async function viewRoles() {
 }
 
 async function viewEmployees() {
-    const departments = await db.viewDepartments();
+    const employees = await db.viewEmployees();
+
+    console.log("\n");
+    console.table(employees);
+
+    requestPrompts();
+}
+
+async function updateEmployeeRole() {
+    const employees = await db.viewEmployees();
   
-    const departmentChoices = departments.map(({ id, name }) => ({
-      name: name,
+    const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
       value: id
     }));
   
-    const { departmentId } = await prompt([
+    const { employeeId } = await prompt([
       {
         type: "list",
-        name: "departmentId",
-        message: "Which department would you like to see employees for?",
-        choices: departmentChoices
+        name: "employee_id",
+        message: "Which employee's role do you want to update?",
+        choices: employeeChoices
       }
     ]);
   
-    const employees = await db.viewEmployees(departmentId);
+    const roles = await db.viewRoles();
   
-    console.log("\n");
-    console.table(employees);
+    const roleChoices = roles.map(({ id, title }) => ({
+      name: title,
+      value: id
+    }));
+  
+    const { roleId } = await prompt([
+      {
+        type: "list",
+        name: "roleId",
+        message: "Which role will the employee be performing moving forward?",
+        choices: roleChoices
+      }
+    ]);
+  
+    await db.updateEmployeeRole(employeeId, roleId);
+  
+    console.log("Updated employee's role");
   
     requestPrompts();
   }
