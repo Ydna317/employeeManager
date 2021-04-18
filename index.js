@@ -128,7 +128,30 @@ async function viewDepartments() {
 
     requestPrompts();
 }
-
+async function viewEmployees() {
+    const departments = await db.viewDepartments();
+  
+    const departmentChoices = departments.map(({ id, name }) => ({
+      name: name,
+      value: id
+    }));
+  
+    const { departmentId } = await prompt([
+      {
+        type: "list",
+        name: "departmentId",
+        message: "Which department would you like to see employees for?",
+        choices: departmentChoices
+      }
+    ]);
+  
+    const employees = await db.viewEmployees(departmentId);
+  
+    console.log("\n");
+    console.table(employees);
+  
+    requestPrompts();
+  }
 function exitProgram() {
     console.log("Goodbye.");
     process.exit();
